@@ -6,21 +6,14 @@ from random import randint
 
 def reset_food():
 	# Reseta a posição da comida
-	return (randint(0, (SCREEN_WIDTH-10)//10)*10, randint(0, (SCREEN_HEIGHT-10)//10)*10)
+	return (randint(30, (SCREEN_WIDTH-40)//10)*10, randint(30, (SCREEN_HEIGHT-40)//10)*10)
 
 
-def snake_is_die(snk):
+def snake_is_die(snk, fg_r, snk_r):
 	# Verifica se a cobrinha morreu
-	snake_head = snake[0]
-	result = False
-	if 0 < snake_head[0] < SCREEN_WIDTH and 0 < snake_head[1] < SCREEN_HEIGHT:
-		pass
-	else:
-		result = True # Morreu ao sair da tela
-	for snake_bd in snake[1:]:
-		if snake_head[0] == snake_bd[0] and snake_head[1] == snake_bd[1]:
-			result = True # Morreu ao comer o próprio rabo
-	return result
+	if not snk_r.colliderect(fg_r) or snk[0] in snk[1:]:
+		return True
+
 
 def import_record():
 	# Importando o record, salvo externamente
@@ -55,15 +48,17 @@ clock = pygame.time.Clock()
 fps = 30
 
 # Cores a serem usadas
-snake_color_1 = (255, 255, 255)
+snake_color_1 = (200, 200, 200)
 snake_color_2 = (255, 0, 0)
-screen_bg = (255, 255, 255)
-screen_bg = (0, 0, 0)
+screen_bg = (0, 100, 30)
+screen_fg = (0, 190, 30)
 food_color = (0, 255, 0)
 score_color = (255, 255, 255)
 
-# Variaveis da cobrinha
+# Tela sobrevivencia
+screen_foreground = [30, 30, 1020, 660]
 
+# Variaveis da cobrinha
 snake = [[x, 300] for x in range(300, 100, -10)]
 snake_body = 3
 snake_size = 10
@@ -99,7 +94,8 @@ while run:
 				# Define a direção da cobrinha, desde que a nova direção não seja para tras
 				move = event.key if event.key != move_set[move][2] else move
 	# Limpa a tela
-	screen.fill(screen_bg)
+	screen.fill(screen_fg)
+	fg_rect = pygame.draw.rect(screen, screen_bg, screen_foreground)
 
 	# Salva a posição antiga da cabeça da cobrinha para uso futuro
 	snake_old_head = snake[0][:]
@@ -109,9 +105,9 @@ while run:
 
 	# Mostra pontuação na tela
 	score_text = font.render(f"Score   {score:0>3}", True, score_color)
-	screen.blit(score_text, (10, 10))
+	screen.blit(score_text, (30, 5))
 	record_text = font.render(f"Record {record:0>3}", True, score_color)
-	screen.blit(record_text, (10, 40))
+	screen.blit(record_text, (945, 5))
 
 	# Desenha a cabeça da cobra
 	snake_head_rect = pygame.draw.rect(screen, snake_color_2, (snake[0][0], snake[0][1], snake_size, snake_size))
@@ -135,7 +131,7 @@ while run:
 		snake_old_head = snake_old_bd
 
 	# Testa se a cobrinha morreu
-	if snake_is_die(snake):
+	if snake_is_die(snake, fg_rect, snake_head_rect):
 		run =  False
 	
 	clock.tick(fps)
